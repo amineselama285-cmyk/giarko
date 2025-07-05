@@ -90,16 +90,17 @@ def login_user():
 def create_order():
     order_data = request.get_json()
 
-    # --- تعديل: ربط الطلب بالعميل المسجل ---
     customer_id = order_data.get('customerId')
     if not customer_id:
         return jsonify({"error": "معرف العميل مطلوب لإنشاء طلب"}), 400
     
-    # التأكد من أن العميل موجود
-    customers = read_data(CUSTOMERS_FILE)
-    customer = next((c for c in customers if c.get('id') == customer_id), None)
-    if not customer:
-        return jsonify({"error": "العميل غير موجود"}), 404
+    # --- التعديل الرئيسي: التحقق فقط إذا لم يكن العميل "زائر" ---
+    if customer_id != 'guest':
+        customers = read_data(CUSTOMERS_FILE)
+        customer = next((c for c in customers if c.get('id') == customer_id), None)
+        if not customer:
+            return jsonify({"error": "العميل المسجل غير موجود"}), 404
+    # إذا كان العميل "guest"، يتم تجاوز التحقق والمتابعة
 
     orders = read_data(ORDERS_FILE)
     order_id = f"GYRKO-{abs(hash(str(order_data) + str(uuid.uuid4()))) % 1000000}"
@@ -107,7 +108,7 @@ def create_order():
     final_order = {
         "orderId": order_id,
         "customerId": customer_id,
-        "customer": order_data['customer'], # يتم إرسال بيانات العميل من الواجهة الأمامية
+        "customer": order_data['customer'],
         "items": order_data['items'],
         "totalAmount": order_data['totalAmount'],
         "orderDate": order_data['orderDate'],
@@ -116,7 +117,7 @@ def create_order():
     
     orders.insert(0, final_order)
     write_data(ORDERS_FILE, orders)
-    print(f"تم استلام طلب جديد ({final_order['orderId']}) من العميل: {customer.get('username')}")
+    print(f"تم استلام طلب جديد ({final_order['orderId']}) من العميل ID: {customer_id}")
 
     return jsonify({"message": "تم استلام الطلب بنجاح", "order": final_order}), 201
 
@@ -141,20 +142,16 @@ def update_order_status(order_id):
 
 @app.route('/api/orders', methods=['GET'])
 def get_orders():
-    # --- تعديل: إمكانية فلترة الطلبات حسب العميل ---
     customer_id = request.args.get('customerId')
     orders = read_data(ORDERS_FILE)
     if customer_id:
-        # إرجاع الطلبات الخاصة بالعميل المحدد فقط
         user_orders = [order for order in orders if order.get('customerId') == customer_id]
         return jsonify(user_orders)
-    # إذا لم يتم تحديد عميل، أرجع كل الطلبات (للوحة التحكم)
     return jsonify(orders)
 
 @app.route('/api/customers', methods=['GET'])
 def get_customers():
     customers_raw = read_data(CUSTOMERS_FILE)
-    # إزالة كلمات المرور قبل إرسالها
     customers_safe = [{k: v for k, v in c.items() if k != 'password'} for c in customers_raw]
     return jsonify(customers_safe)
 
