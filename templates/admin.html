@@ -7,28 +7,26 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     
     <style>
-        /* === تصميم احترافي مطوّر مع دعم الوضع الليلي وحركات متقدمة === */
-        
         :root {
-            /* --- الوضع الفاتح (Light Mode) --- */
-            --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            --card-bg: rgba(255, 255, 255, 0.65);
-            --card-border: rgba(255, 255, 255, 0.9);
-            --text-primary: #1d2d44;
-            --text-secondary: #5a677d;
-            --accent-color: #0d6efd;
-            --accent-glow: rgba(13, 110, 253, 0.2);
-            --hover-bg: rgba(255, 255, 255, 0.9);
-            --table-header-bg: rgba(248, 249, 250, 0.8);
-            --table-border: #dee2e6;
-            
-            /* ألوان الحالات - فاتح */
-            --status-pending-bg: #fff3cd; --status-pending-text: #664d03;
-            --status-shipped-bg: #cff4fc; --status-shipped-text: #055160;
-            --status-completed-bg: #d1e7dd; --status-completed-text: #0f5132;
-            --status-cancelled-bg: #f8d7da; --status-cancelled-text: #58151c;
+            --bg-gradient: linear-gradient(135deg, #232526 0%, #414345 100%);
+            --card-bg: rgba(45, 55, 72, 0.55);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --text-primary: #edf2f7;
+            --text-secondary: #a0aec0;
+            --accent-color: #42a5f5;
+            --accent-glow: rgba(66, 165, 245, 0.2);
+            --hover-bg: rgba(45, 55, 72, 0.9);
+            --table-header-bg: rgba(26, 32, 44, 0.7);
+            --table-border: #4a5568;
+
+            /* ألوان الحالات */
+            --status-pending-bg: #4d3c11; --status-pending-text: #ffe082;
+            --status-shipped-bg: #0c3e4e; --status-shipped-text: #b3e5fc;
+            --status-completed-bg: #1e4635; --status-completed-text: #c8e6c9;
+            --status-cancelled-bg: #5c2126; --status-cancelled-text: #ffcdd2;
 
             --success-color: #198754;
             --error-color: #dc3545;
@@ -37,29 +35,6 @@
             --animation-easing: cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
-        @media (prefers-color-scheme: dark) {
-            :root {
-                /* --- الوضع الداكن (Dark Mode) --- */
-                --bg-gradient: linear-gradient(135deg, #232526 0%, #414345 100%);
-                --card-bg: rgba(45, 55, 72, 0.55);
-                --card-border: rgba(255, 255, 255, 0.1);
-                --text-primary: #edf2f7;
-                --text-secondary: #a0aec0;
-                --accent-color: #42a5f5;
-                --accent-glow: rgba(66, 165, 245, 0.2);
-                --hover-bg: rgba(45, 55, 72, 0.9);
-                --table-header-bg: rgba(26, 32, 44, 0.7);
-                --table-border: #4a5568;
-
-                /* ألوان الحالات - داكن */
-                --status-pending-bg: #4d3c11; --status-pending-text: #ffe082;
-                --status-shipped-bg: #0c3e4e; --status-shipped-text: #b3e5fc;
-                --status-completed-bg: #1e4635; --status-completed-text: #c8e6c9;
-                --status-cancelled-bg: #5c2126; --status-cancelled-text: #ffcdd2;
-            }
-        }
-
-        /* تعريف الحركات */
         @keyframes fadeInUp {
             from { opacity: 0; transform: translateY(25px); }
             to { opacity: 1; transform: translateY(0); }
@@ -108,9 +83,6 @@
             margin: 0;
             text-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
-        .header h1 img {
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.2));
-        }
         
         .card {
             background-color: var(--card-bg);
@@ -127,8 +99,6 @@
         
         .card:nth-of-type(1) { animation-delay: 0.2s; }
         .card:nth-of-type(2) { animation-delay: 0.3s; }
-        .card:nth-of-type(3) { animation-delay: 0.4s; }
-
 
         h2 {
             display: flex;
@@ -143,7 +113,7 @@
             padding-bottom: 20px;
         }
         
-        h2 svg { width: 32px; height: 32px; color: var(--accent-color); }
+        h2 i { color: var(--accent-color); }
 
         .table-wrapper { overflow-x: auto; }
 
@@ -176,12 +146,8 @@
         tbody tr {
             border-bottom: 1px solid var(--table-border);
             transition: background-color 0.3s ease, transform 0.3s ease;
-            opacity: 0;
-            animation: fadeInUp 0.6s ease forwards;
         }
-        
 
-        tbody tr:last-child { border-bottom: none; }
         tbody tr:hover { 
             background-color: var(--hover-bg);
             transform: translateY(-4px);
@@ -224,6 +190,13 @@
         ul { padding-right: 20px; margin: 0; list-style-type: '– '; }
         ul li { padding-right: 8px; }
 
+        .loading-text {
+            text-align: center;
+            padding: 20px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
         @media (max-width: 768px) {
             body { padding: 15px; }
             .container { gap: 25px; }
@@ -237,67 +210,61 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1><img src="https://img.icons8.com/color/48/000000/gear.png" alt="Ghyarko Logo"/> لوحة تحكم غياركو</h1>
+            <h1><i class="fa-solid fa-gears" style="color: #42a5f5;"></i> لوحة تحكم غياركو</h1>
         </div>
 
+        <!-- بطاقة الطلبات -->
         <div class="card">
             <h2>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path d="M17,18C15.89,18 15,18.89 15,20A2,2 0 0,0 17,22A2,2 0 0,0 19,20C19,18.89 18.1,18 17,18M1,2V4H3L6.6,11.59L5.24,14.04C5.09,14.32 5,14.65 5,15A2,2 0 0,0 7,17H19V15H7.42A0.25,0.25 0 0,1 7.17,14.75L8.1,13H15.55C16.3,13 16.96,12.58 17.3,11.97L20.88,5.5C20.95,5.34 21,5.17 21,5A1,1 0 0,0 20,4H5.21L4.27,2H1V2M7,18C5.89,18 5,18.89 5,20A2,2 0 0,0 7,22A2,2 0 0,0 9,20C9,18.89 8.1,18 7,18Z"/></svg>
-                الطلبات ({{ orders|length }})
+                <i class="fa-solid fa-cart-shopping"></i>
+                الطلبات (<span id="orders-count">0</span>)
             </h2>
             <div class="table-wrapper">
                 <table class="orders-table">
-                    <thead><tr><th>رقم الطلب</th><th>الزبون</th><th>التاريخ</th><th>المنتجات</th><th>الإجمالي</th><th>الحالة</th></tr></thead>
-                    <tbody>
-                        {% for order in orders %}
+                    <thead>
                         <tr>
-                            <td><strong>#{{ order.get('orderId', '').split('-')[1] }}</strong></td>
-                            <td>{{ order.get('customer', {}).get('name', 'N/A') }}<div class="details">{{ order.get('customer', {}).get('phone', 'N/A') }}</div></td>
-                            <td>{{ order.get('orderDate', '').split('T')[0] }}</td>
-                            <td><ul>{% for item in order.get('items', []) %}<li>المنتج (ID: {{ item.get('productId', 'N/A') }}) - الكمية: {{ item.get('quantity', 0) }}</li>{% endfor %}</ul></td>
-                            <td>{{ "%.2f"|format(order.get('totalAmount', 0)) }} د.ج</td>
-                            <td>
-                                <select class="status-select" data-order-id="{{ order.get('orderId') }}">
-                                    <option value="قيد التجهيز" {% if order.get('status') == 'قيد التجهيز' %}selected{% endif %}>قيد التجهيز</option>
-                                    <option value="تم الشحن" {% if order.get('status') == 'تم الشحن' %}selected{% endif %}>تم الشحن</option>
-                                    <option value="اكتمل" {% if order.get('status') == 'اكتمل' %}selected{% endif %}>اكتمل</option>
-                                    <option value="ملغي" {% if order.get('status') == 'ملغي' %}selected{% endif %}>ملغي</option>
-                                </select>
-                            </td>
+                            <th>رقم الطلب</th>
+                            <th>الزبون</th>
+                            <th>التاريخ</th>
+                            <th>المنتجات</th>
+                            <th>الإجمالي</th>
+                            <th>الحالة</th>
                         </tr>
-                        {% else %}
-                        <tr><td colspan="6" style="text-align: center; padding: 20px;">لا توجد طلبات حالياً.</td></tr>
-                        {% endfor %}
+                    </thead>
+                    <tbody id="orders-tbody">
+                        <tr><td colspan="6" class="loading-text">جاري تحميل الطلبات...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
 
+        <!-- بطاقة العملاء -->
         <div class="card">
             <h2>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 24 24"><path d="M12,19.2C9.5,19.2 7.29,17.92 6,16C6.03,14 10,12.9 12,12.9C14,12.9 17.97,14 18,16C16.71,17.92 14.5,19.2 12,19.2M12,5A3,3 0 0,1 15,8A3,3 0 0,1 12,11A3,3 0 0,1 9,8A3,3 0 0,1 12,5M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12C22,6.47 17.5,2 12,2Z" /></svg>
-                العملاء المسجلون ({{ customers|length }})
+                <i class="fa-solid fa-users"></i>
+                العملاء المسجلون (<span id="customers-count">0</span>)
             </h2>
             <div class="table-wrapper">
                 <table class="customers-table">
-                    <thead><tr><th>اسم المستخدم</th><th>الاسم الكامل</th><th>رقم الهاتف</th><th>الولاية</th></tr></thead>
-                    <tbody>
-                        {% for customer in customers %}
+                    <thead>
                         <tr>
-                            <td><strong>{{ customer.get('username', 'N/A') }}</strong></td>
-                            <td>{{ customer.get('name', 'N/A') }}</td>
-                            <td>{{ customer.get('phone', 'N/A') }}</td>
-                            <td>{{ customer.get('wilaya', 'N/A') }}</td>
+                            <th>اسم المستخدم</th>
+                            <th>الاسم الكامل</th>
+                            <th>رقم الهاتف</th>
+                            <th>الولاية</th>
                         </tr>
-                        {% else %}
-                        <tr><td colspan="4" style="text-align: center; padding: 20px;">لا يوجد عملاء مسجلون.</td></tr>
-                        {% endfor %}
+                    </thead>
+                    <tbody id="customers-tbody">
+                        <tr><td colspan="4" class="loading-text">جاري تحميل قائمة العملاء...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
+
     <script>
+        const API_BASE_URL = 'https://test-zjdr.onrender.com';
+
         function applyStatusStyle(selectElement) {
             const status = selectElement.value;
             selectElement.className = 'status-select'; // Reset classes
@@ -307,45 +274,110 @@
             else if (status === 'ملغي') selectElement.classList.add('status-cancelled');
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('.status-select').forEach(applyStatusStyle);
-        });
-        
-        document.addEventListener('change', async function(e) {
-            if (e.target.classList.contains('status-select')) {
-                const selectElement = e.target;
-                const orderId = selectElement.dataset.orderId;
-                const newStatus = selectElement.value;
-                
-                applyStatusStyle(selectElement); // Update color immediately
-
-                // Remove previous animation classes
-                selectElement.classList.remove('success-animation', 'error-animation');
-
-                try {
-                    const response = await fetch(`/api/orders/${orderId}/status`, {
-                        method: 'PUT',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ status: newStatus })
-                    });
-                    
-                    if (!response.ok) throw new Error('فشل تحديث الحالة');
-                    
-                    // Add success animation
-                    selectElement.classList.add('success-animation');
-                    selectElement.addEventListener('animationend', () => {
-                        selectElement.classList.remove('success-animation');
-                    }, { once: true });
-
-                } catch (error) {
-                    // Add error animation
-                    selectElement.classList.add('error-animation');
-                    selectElement.addEventListener('animationend', () => {
-                        selectElement.classList.remove('error-animation');
-                    }, { once: true });
+        async function fetchDashboardData() {
+            try {
+                // جلب الطلبات
+                const ordersResp = await fetch(`${API_BASE_URL}/api/orders`);
+                if (ordersResp.ok) {
+                    const orders = await ordersResp.json();
+                    document.getElementById('orders-count').textContent = orders.length;
+                    renderOrders(orders);
                 }
+
+                // جلب العملاء
+                const customersResp = await fetch(`${API_BASE_URL}/api/customers`);
+                if (customersResp.ok) {
+                    const customers = await customersResp.json();
+                    document.getElementById('customers-count').textContent = customers.length;
+                    renderCustomers(customers);
+                }
+            } catch (error) {
+                console.error("حدث خطأ أثناء تحميل البيانات:", error);
             }
-        });
+        }
+
+        function renderOrders(orders) {
+            const tbody = document.getElementById('orders-tbody');
+            if (orders.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; padding: 20px;">لا توجد طلبات حالياً.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = orders.map(order => {
+                const orderIdShort = order.orderId ? order.orderId.split('-')[1] : 'N/A';
+                const dateStr = order.orderDate ? order.orderDate.split('T')[0] : 'N/A';
+                const customerName = order.customer ? order.customer.name : 'زائر';
+                const customerPhone = order.customer ? order.customer.phone : 'N/A';
+                const itemsList = order.items ? order.items.map(item => `<li>المنتج (ID: ${item.productId}) - الكمية: ${item.quantity}</li>`).join('') : '';
+
+                return `
+                    <tr>
+                        <td><strong>#${orderIdShort}</strong></td>
+                        <td>${customerName}<div class="details">${customerPhone}</div></td>
+                        <td>${dateStr}</td>
+                        <td><ul>${itemsList}</ul></td>
+                        <td>${parseFloat(order.totalAmount || 0).toLocaleString()} د.ج</td>
+                        <td>
+                            <select class="status-select" data-order-id="${order.orderId}" onchange="updateOrderStatus(this)">
+                                <option value="قيد التجهيز" ${order.status === 'قيد التجهيز' ? 'selected' : ''}>قيد التجهيز</option>
+                                <option value="تم الشحن" ${order.status === 'تم الشحن' ? 'selected' : ''}>تم الشحن</option>
+                                <option value="اكتمل" ${order.status === 'اكتمل' ? 'selected' : ''}>اكتمل</option>
+                                <option value="ملغي" ${order.status === 'ملغي' ? 'selected' : ''}>ملغي</option>
+                            </select>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            // تطبيق التنسيقات على السلكت بعد رندرة الجدول
+            tbody.querySelectorAll('.status-select').forEach(applyStatusStyle);
+        }
+
+        function renderCustomers(customers) {
+            const tbody = document.getElementById('customers-tbody');
+            if (customers.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; padding: 20px;">لا يوجد عملاء مسجلون.</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = customers.map(customer => `
+                <tr>
+                    <td><strong>${customer.username || 'N/A'}</strong></td>
+                    <td>${customer.name || 'N/A'}</td>
+                    <td>${customer.phone || 'N/A'}</td>
+                    <td>${customer.wilaya || 'N/A'}</td>
+                </tr>
+            `).join('');
+        }
+
+        async function updateOrderStatus(selectElement) {
+            const orderId = selectElement.dataset.orderId;
+            const newStatus = selectElement.value;
+            
+            applyStatusStyle(selectElement);
+            selectElement.classList.remove('success-animation', 'error-animation');
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/orders/${orderId}/status`, {
+                    method: 'PUT',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ status: newStatus })
+                });
+                
+                if (!response.ok) throw new Error('فشل التحديث');
+                
+                selectElement.classList.add('success-animation');
+                selectElement.addEventListener('animationend', () => {
+                    selectElement.classList.remove('success-animation');
+                }, { once: true });
+            } catch (error) {
+                selectElement.classList.add('error-animation');
+                selectElement.addEventListener('animationend', () => {
+                    selectElement.classList.remove('error-animation');
+                }, { once: true });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', fetchDashboardData);
     </script>
 </body>
 </html>
