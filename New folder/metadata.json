@@ -1,0 +1,5 @@
+{
+  "name": "Bolt AI Frontend Clone",
+  "description": "A high-fidelity replica of the Bolt.dev landing page, focusing on UI/UX and visual aesthetics, built with React, TypeScript, and Tailwind CSS.",
+  "requestFramePermissions": []
+}
