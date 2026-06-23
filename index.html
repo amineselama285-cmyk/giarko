@@ -1260,8 +1260,9 @@ input:checked + .slider:before { transform: translateX(24px); }
              <i class="fa-solid fa-circle-check"></i>
              <h1 id="order-success-title"></h1>
              <p>شكراً لثقتك في غياركو. يمكنك متابعة حالة طلبك من صفحة حسابي.</p>
-             <div class="order-id-label">معرّف طلبك هو:</div>
-             <div class="order-id" id="order-success-id"></div>
+             <div class="order-id-label">معرّف طلبك هو (اضغط للنسخ):</div>
+             <div class="order-id" id="order-success-id" data-action="copy-order-id" style="cursor:pointer;"></div>
+             <p id="order-success-track-hint" style="display:none; color: var(--text-color-muted); font-size:14px; max-width:340px; margin: 0 auto 25px auto;">احتفظ بهذا المعرّف لتتبع طلبك لاحقاً من صفحة "طلباتي".</p>
              <button class="btn-primary" data-action="go-home">العودة للرئيسية</button>
         </div>
 
@@ -12332,6 +12333,7 @@ const categoriesData = [
                 </div>
                 <div class="profile-menu">
                     <div class="profile-menu-item" data-action="go-login"><i class="fa-solid fa-arrow-right-to-bracket"></i><span>تسجيل الدخول / إنشاء حساب</span><i class="fa-solid fa-chevron-left"></i></div>
+                    <div class="profile-menu-item" data-action="show-my-orders"><i class="fa-solid fa-box"></i><span>طلباتي / تتبّع طلب</span><i class="fa-solid fa-chevron-left"></i></div>
                     <div class="profile-menu-item" data-action="show-settings"><i class="fa-solid fa-gear"></i><span>الإعدادات</span><i class="fa-solid fa-chevron-left"></i></div>
                      <p style="text-align: center; color: var(--text-color-muted); padding: 20px 15px; font-size: 14px;">
                         سجل الدخول لتتمكن من تتبع طلباتك وحفظ معلوماتك لتجربة أسرع.
@@ -12341,43 +12343,139 @@ const categoriesData = [
             document.getElementById('profile-content').innerHTML = profileHTML;
         }
         
-        async function renderMyOrdersPage() {
-            const container = document.getElementById('my-orders-list');
-            container.innerHTML = `<p style="text-align:center;">جاري تحميل طلباتك...</p>`;
+        // === إدارة الطلبات المتتبعة للزائر (غير المسجل) ===
+        function getGuestTrackedOrderIds() {
+            try { return JSON.parse(localStorage.getItem('guestTrackedOrders')) || []; }
+            catch (e) { return []; }
+        }
+        function addGuestTrackedOrderId(orderId) {
+            if (!orderId) return false;
+            const ids = getGuestTrackedOrderIds();
+            if (ids.includes(orderId)) return false;
+            ids.unshift(orderId);
+            localStorage.setItem('guestTrackedOrders', JSON.stringify(ids));
+            return true;
+        }
+        function removeGuestTrackedOrderId(orderId) {
+            const ids = getGuestTrackedOrderIds().filter(id => id !== orderId);
+            localStorage.setItem('guestTrackedOrders', JSON.stringify(ids));
+        }
+
+        // يجلب طلبات الزائر من الخادم ويرجّع فقط الطلبات المتتبعة محلياً
+        async function fetchGuestTrackedOrders() {
+            const trackedIds = getGuestTrackedOrderIds();
+            if (trackedIds.length === 0) return [];
+            const response = await fetch(`${API_BASE_URL}/api/orders?customerId=guest`);
+            if (!response.ok) throw new Error('فشل تحميل الطلبات');
+            const allGuestOrders = await response.json();
+            return trackedIds
+                .map(id => allGuestOrders.find(o => o.orderId === id))
+                .filter(Boolean);
+        }
+
+        // إضافة طلب بالمعرّف (تتبع) للزائر
+        async function trackGuestOrderById(orderId) {
+            const trimmed = (orderId || '').trim();
+            if (!trimmed) { showToast('الرجاء إدخال معرّف الطلب', 'error'); return; }
+            if (getGuestTrackedOrderIds().includes(trimmed)) {
+                showToast('هذا الطلب مضاف بالفعل', 'info');
+                return;
+            }
             try {
-                const response = await fetch(`${API_BASE_URL}/api/orders?customerId=${currentUser.id}`);
-                if (!response.ok) throw new Error('فشل تحميل الطلبات');
-                const orders = await response.json();
-                if (orders.length === 0) {
-                    container.innerHTML = `<div class="empty-message"><i class="fa-solid fa-receipt"></i><p>لا توجد لديك طلبات سابقة.</p></div>`;
+                const response = await fetch(`${API_BASE_URL}/api/orders?customerId=guest`);
+                if (!response.ok) throw new Error('فشل الاتصال بالخادم');
+                const allGuestOrders = await response.json();
+                const found = allGuestOrders.find(o => o.orderId === trimmed);
+                if (!found) {
+                    showToast('لم يتم العثور على طلب بهذا المعرّف', 'error');
                     return;
                 }
-                container.innerHTML = orders.map(order => `
-                    <div class="order-summary-card" data-order-id="${order.orderId}">
-                        <div class="order-summary-header">
-                            <div class="order-summary-id">#${order.orderId.split('-')[1]}</div>
-                            <div class="order-summary-status" data-status="${order.status || 'قيد التجهيز'}">${order.status || 'قيد التجهيز'}</div>
-                        </div>
-                        <div class="order-summary-body">
-                            <span>${new Date(order.orderDate).toLocaleDateString('ar-DZ')}</span>
-                            <span style="color: var(--primary-color); font-weight:700;">${order.totalAmount.toLocaleString()} د.ج</span>
-                        </div>
-                    </div>`).join('');
+                addGuestTrackedOrderId(trimmed);
+                showToast('تمت إضافة الطلب إلى طلباتك', 'success');
+                renderMyOrdersPage();
+            } catch (error) {
+                console.error('Error tracking order:', error);
+                showToast('حدث خطأ أثناء البحث عن الطلب', 'error');
+            }
+        }
+
+        function renderOrderCard(order) {
+            return `
+                <div class="order-summary-card" data-order-id="${order.orderId}">
+                    <div class="order-summary-header">
+                        <div class="order-summary-id">${order.orderId}</div>
+                        <div class="order-summary-status" data-status="${order.status || 'قيد التجهيز'}">${order.status || 'قيد التجهيز'}</div>
+                    </div>
+                    <div class="order-summary-body">
+                        <span>${new Date(order.orderDate).toLocaleDateString('ar-DZ')}</span>
+                        <span style="color: var(--primary-color); font-weight:700;">${order.totalAmount.toLocaleString()} د.ج</span>
+                    </div>
+                </div>`;
+        }
+
+        async function renderMyOrdersPage() {
+            const container = document.getElementById('my-orders-list');
+            const isGuest = !currentUser || currentUser.id === 'guest';
+
+            // للزائر: نعرض حقل إضافة طلب بالمعرّف (تتبع) أعلى الصفحة
+            const trackBoxHTML = isGuest ? `
+                <div class="order-detail-section" style="margin-bottom:20px;">
+                    <h3 style="font-size:18px;">تتبّع طلب بالمعرّف</h3>
+                    <div class="form-group" style="margin-bottom:12px;">
+                        <input type="text" id="track-order-input" placeholder="أدخل معرّف الطلب (مثال: GYRKO-123456)">
+                    </div>
+                    <button class="btn-primary" id="track-order-btn">إضافة الطلب</button>
+                </div>` : '';
+
+            container.innerHTML = trackBoxHTML + `<p style="text-align:center;">جاري تحميل طلباتك...</p>`;
+            const listAnchor = () => {
+                // نزيل رسالة التحميل ونبقي صندوق التتبع للزائر
+                container.innerHTML = trackBoxHTML + '<div id="my-orders-list-items"></div>';
+                return document.getElementById('my-orders-list-items');
+            };
+
+            try {
+                let orders;
+                if (isGuest) {
+                    orders = await fetchGuestTrackedOrders();
+                } else {
+                    const response = await fetch(`${API_BASE_URL}/api/orders?customerId=${currentUser.id}`);
+                    if (!response.ok) throw new Error('فشل تحميل الطلبات');
+                    orders = await response.json();
+                }
+
+                const itemsContainer = listAnchor();
+                if (!orders || orders.length === 0) {
+                    itemsContainer.innerHTML = `<div class="empty-message"><i class="fa-solid fa-receipt"></i><p>${isGuest ? 'لا توجد طلبات متتبعة. أضف معرّف طلب بالأعلى لتتبعه.' : 'لا توجد لديك طلبات سابقة.'}</p></div>`;
+                } else {
+                    itemsContainer.innerHTML = orders.map(order => renderOrderCard(order)).join('');
+                }
             } catch (error) {
                 console.error("Error fetching orders:", error);
-                container.innerHTML = `<div class="empty-message"><p>حدث خطأ أثناء تحميل الطلبات.</p></div>`;
+                const itemsContainer = listAnchor();
+                itemsContainer.innerHTML = `<div class="empty-message"><p>حدث خطأ أثناء تحميل الطلبات.</p></div>`;
+            } finally {
+                // ربط زر التتبع بعد إعادة الرسم
+                const trackBtn = document.getElementById('track-order-btn');
+                const trackInput = document.getElementById('track-order-input');
+                if (trackBtn && trackInput) {
+                    trackBtn.addEventListener('click', () => trackGuestOrderById(trackInput.value));
+                    trackInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') { e.preventDefault(); trackGuestOrderById(trackInput.value); } });
+                }
             }
         }
 
         function renderOrderDetailPage(orderId) {
+            const isGuest = !currentUser || currentUser.id === 'guest';
             async function fetchAndRender() {
-                 const response = await fetch(`${API_BASE_URL}/api/orders?customerId=${currentUser.id}`);
+                 const lookupId = isGuest ? 'guest' : currentUser.id;
+                 const response = await fetch(`${API_BASE_URL}/api/orders?customerId=${lookupId}`);
                  const orders = await response.json();
                  const order = orders.find(o => o.orderId === orderId);
                  if (!order) { goBack(); return; }
 
-                const customerInfo = `<div class="order-detail-section"><h3>معلومات التوصيل</h3><div class="detail-row"><span>الاسم:</span><span>${order.customer.name}</span></div><div class="detail-row"><span>الهاتف:</span><span>${order.customer.phone}</span></div><div class="detail-row"><span>الولاية:</span><span>${order.customer.wilaya}</span></div><div class="detail-row"><span>العنوان:</span><span>${order.customer.address}</span></div></div>`;
-                const itemsInfo = `<div class="order-detail-section order-detail-items"><h3>المنتجات</h3>${order.items.map(item => { const product = allProducts.find(p => p.id === item.productId); return `<div class="cart-item" style="margin-bottom:10px;"><img src="${product.image}" class="cart-item-img"><div class="cart-item-details" style="gap: 5px;"><div class="cart-item-name">${product.name} (x${item.quantity})</div><div class="cart-item-price">${(product.price * item.quantity).toLocaleString()} د.ج</div></div></div>`; }).join('')}</div>`;
+                const customerInfo = `<div class="order-detail-section"><h3>معلومات الطلب</h3><div class="detail-row"><span>معرّف الطلب:</span><span style="font-weight:700;">${order.orderId}</span></div><div class="detail-row"><span>الحالة:</span><span class="order-summary-status" data-status="${order.status || 'قيد التجهيز'}" style="display:inline-block;">${order.status || 'قيد التجهيز'}</span></div><div class="detail-row"><span>التاريخ:</span><span>${new Date(order.orderDate).toLocaleDateString('ar-DZ')}</span></div></div><div class="order-detail-section"><h3>معلومات التوصيل</h3><div class="detail-row"><span>الاسم:</span><span>${order.customer.name}</span></div><div class="detail-row"><span>الهاتف:</span><span>${order.customer.phone}</span></div><div class="detail-row"><span>الولاية:</span><span>${order.customer.wilaya}</span></div><div class="detail-row"><span>العنوان:</span><span>${order.customer.address}</span></div></div>`;
+                const itemsInfo = `<div class="order-detail-section order-detail-items"><h3>المنتجات</h3>${order.items.map(item => { const product = allProducts.find(p => p.id === item.productId) || { name: `منتج #${item.productId}`, image: 'https://via.placeholder.com/80', price: 0 }; return `<div class="cart-item" style="margin-bottom:10px;"><img src="${product.image}" class="cart-item-img"><div class="cart-item-details" style="gap: 5px;"><div class="cart-item-name">${product.name} (x${item.quantity})</div><div class="cart-item-price">${(product.price * item.quantity).toLocaleString()} د.ج</div></div></div>`; }).join('')}</div>`;
                 const summaryInfo = `<div class="order-detail-section"><h3>ملخص الدفع</h3><div class="detail-row total"><span>المبلغ الإجمالي:</span><span>${order.totalAmount.toLocaleString()} د.ج</span></div></div>`;
                 document.getElementById('order-detail-content').innerHTML = customerInfo + itemsInfo + summaryInfo;
             }
@@ -12424,7 +12522,16 @@ const categoriesData = [
                 cart = []; localStorage.removeItem(`userCart_${currentUser.id}`);
                 updateCartBadges();
                 document.getElementById('order-success-title').textContent = `أهلاً ${result.order.customer.name.split(' ')[0]}`;
-                document.getElementById('order-success-id').textContent = `#${result.order.orderId.split('-')[1]}`;
+                const newOrderId = result.order.orderId;
+                document.getElementById('order-success-id').textContent = newOrderId;
+                document.getElementById('order-success-id').dataset.orderId = newOrderId;
+                // إذا كان المستخدم ضيفاً غير مسجل، احفظ معرّف الطلب تلقائياً ليظهر في "طلباتي"
+                if (!currentUser || currentUser.id === 'guest') {
+                    addGuestTrackedOrderId(newOrderId);
+                    document.getElementById('order-success-track-hint').style.display = 'block';
+                } else {
+                    document.getElementById('order-success-track-hint').style.display = 'none';
+                }
                 showPage('page-order-success');
             } catch (error) { console.error('فشل إرسال الطلب:', error); alert('حدث خطأ أثناء تأكيد الطلب.');
             } finally { submitButton.disabled = false; submitButton.textContent = 'تأكيد الطلب'; }
@@ -12586,13 +12693,30 @@ const categoriesData = [
                         case 'go-cart': renderCartPage(); showPage('page-cart'); break;
                         case 'go-checkout': renderCheckoutPage(); showPage('page-checkout'); break;
                         case 'go-home': pageHistory = ['page-home']; showPage('page-home'); break;
-                        case 'show-my-orders': 
-                            if (currentUser && currentUser.id !== 'guest') {
-                                renderMyOrdersPage(); 
-                                showPage('page-my-orders');
-                            } else {
-                                showAuthPage('page-login');
+                        case 'copy-order-id': {
+                            const idEl = document.getElementById('order-success-id');
+                            const orderIdText = (idEl && (idEl.dataset.orderId || idEl.textContent)) || '';
+                            if (orderIdText) {
+                                const done = () => showToast('تم نسخ معرّف الطلب', 'success');
+                                if (navigator.clipboard && navigator.clipboard.writeText) {
+                                    navigator.clipboard.writeText(orderIdText).then(done).catch(() => {
+                                        const ta = document.createElement('textarea');
+                                        ta.value = orderIdText; document.body.appendChild(ta); ta.select();
+                                        try { document.execCommand('copy'); done(); } catch (e) {}
+                                        document.body.removeChild(ta);
+                                    });
+                                } else {
+                                    const ta = document.createElement('textarea');
+                                    ta.value = orderIdText; document.body.appendChild(ta); ta.select();
+                                    try { document.execCommand('copy'); done(); } catch (e) {}
+                                    document.body.removeChild(ta);
+                                }
                             }
+                            break;
+                        }
+                        case 'show-my-orders': 
+                            renderMyOrdersPage(); 
+                            showPage('page-my-orders');
                             break;
                         case 'show-settings':
                             renderSettingsPage();
